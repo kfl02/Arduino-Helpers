@@ -6,6 +6,7 @@
 #include <AH/Hardware/RegisterEncoders.hpp>
 #include <AH/Hardware/MCP23xxxEncoders.hpp>
 #include <AH/Settings/NamespaceSettings.hpp>
+#include <AH/Hardware/MCP23xxxEncoders.hpp>
 
 BEGIN_AH_NAMESPACE
 

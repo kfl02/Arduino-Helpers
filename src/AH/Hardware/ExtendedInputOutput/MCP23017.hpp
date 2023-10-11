@@ -4,6 +4,7 @@
 #include "ExtendedInputOutput.hpp"
 #include "StaticSizeExtendedIOElement.hpp"
 #include <AH/Containers/BitArray.hpp>
+#include <AH/Hardware/ExtendedInputOutput/MCP230xx.hpp>
 
 BEGIN_AH_NAMESPACE
 
