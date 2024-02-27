@@ -1,9 +1,9 @@
 #pragma once
 
-#include <AH/Settings/Warnings.hpp>
-AH_DIAGNOSTIC_WERROR() // Enable errors on warnings
-
 #include <AH/Hardware/ExtendedInputOutput/MCP230xx.hpp>
+#include "ExtendedInputOutput.hpp"
+#include "StaticSizeExtendedIOElement.hpp"
+#include <AH/Containers/BitArray.hpp>
 
 BEGIN_AH_NAMESPACE
 
@@ -48,4 +48,4 @@ class MCP23017 : public MCP230xx<WireType, 2> {
 
 END_AH_NAMESPACE
 
-AH_DIAGNOSTIC_POP()
+#include "MCP23017.ipp"

@@ -1,17 +1,11 @@
 #pragma once
 
-#include <AH/Settings/NamespaceSettings.hpp>
-#include <AH/Settings/Warnings.hpp>
-
-AH_DIAGNOSTIC_WERROR() // Enable errors on warnings
-
-AH_DIAGNOSTIC_EXTERNAL_HEADER()
 #include <AH/Arduino-Wrapper.h>
-AH_DIAGNOSTIC_POP()
 
 #include <AH/Hardware/ExtendedInputOutput/ExtendedInputOutput.hpp>
 #include <AH/Hardware/RegisterEncoders.hpp>
 #include <AH/Hardware/MCP23xxxEncoders.hpp>
+#include <AH/Settings/NamespaceSettings.hpp>
 
 BEGIN_AH_NAMESPACE
 
@@ -68,5 +62,3 @@ class MCP23017Encoders : public MCP23xxxEncoders<WireType,
 };
 
 END_AH_NAMESPACE
-
-AH_DIAGNOSTIC_POP()
