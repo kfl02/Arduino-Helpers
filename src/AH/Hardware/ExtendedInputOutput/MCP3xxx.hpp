@@ -8,6 +8,10 @@ AH_DIAGNOSTIC_WERROR() // Enable errors on warnings
 #include <AH/Containers/Array.hpp>
 #include <stdlib.h>
 
+AH_DIAGNOSTIC_EXTERNAL_HEADER()
+#include <SPI.h>
+AH_DIAGNOSTIC_POP()
+
 BEGIN_AH_NAMESPACE
 
 /**
