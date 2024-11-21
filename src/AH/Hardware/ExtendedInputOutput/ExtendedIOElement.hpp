@@ -373,6 +373,48 @@ inline void shiftOut(CachedExtIOPin dataPin, CachedExtIOPin clockPin,
     }
 }
 
+/// An ExtIO version of the Arduino function
+inline uint8_t shiftIn(CachedExtIOPin dataPin, CachedExtIOPin clockPin,
+                       BitOrder_t bitOrder) {
+    uint8_t val = 0;
+
+    if (dataPin.elementPin == NO_PIN || clockPin.elementPin == NO_PIN)
+        return;
+    // Native version
+    if (dataPin.element == nullptr && clockPin.element == nullptr) {
+        val = ::shiftIn(arduino_pin_cast(dataPin.elementPin),
+                        arduino_pin_cast(clockPin.elementPin), bitOrder);
+    }
+    // ExtIO version
+    else if (dataPin.element != nullptr && clockPin.element != nullptr) {
+        const auto dataEl = dataPin.element;
+        const auto dataPinN = dataPin.elementPin;
+        const auto clockEl = clockPin.element;
+        const auto clockPinN = clockPin.elementPin;
+        for (uint8_t i = 0; i < 8; i++) {
+            clockEl->digitalWrite(clockPinN, HIGH);
+            if (bitOrder == LSBFIRST)
+                val |= dataEl->digitalRead(dataPinN) << i;
+            else
+                val |= dataEl->digitalRead(dataPinN) << (7 - i);
+            clockEl->digitalWrite(clockPinN, LOW);
+        }
+    }
+    // Mixed version (slow)
+    else {
+        for (uint8_t i = 0; i < 8; i++) {
+            digitalWrite(clockPin, HIGH);
+            if (bitOrder == LSBFIRST)
+                val |= digitalRead(dataPin) << i;
+            else
+                val |= digitalRead(dataPin) << (7 - i);
+            digitalWrite(clockPin, LOW);
+        }
+    }
+
+    return val;
+}
+
 /// A buffered ExtIO version of the Arduino function
 /// @see    ExtendedIOElement::pinModeBuffered
 inline void pinModeBuffered(CachedExtIOPin pin, PinMode_t mode) {

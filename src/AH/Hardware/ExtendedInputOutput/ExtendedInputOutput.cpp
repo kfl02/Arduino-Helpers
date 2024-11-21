@@ -201,9 +201,53 @@ void shiftOut(pin_t dataPin, pin_t clockPin, BitOrder_t bitOrder, uint8_t val) {
         }
     }
 }
+
 void shiftOut(int dataPin, int clockPin, BitOrder_t bitOrder, uint8_t val) {
     ::shiftOut(arduino_pin_cast(dataPin), arduino_pin_cast(clockPin), bitOrder,
                val);
+}
+
+uint8_t shiftIn(pin_t dataPin, pin_t clockPin, BitOrder_t bitOrder) {
+    uint8_t val = 0;
+
+    if (dataPin == NO_PIN || clockPin == NO_PIN)
+        return;
+    // Native version
+    if (isNativePin(dataPin) && isNativePin(clockPin)) {
+        val = ::shiftIn((int)dataPin, (int)clockPin, bitOrder);
+    }
+    // ExtIO version
+    else if (!isNativePin(dataPin) && !isNativePin(clockPin)) {
+        auto dataEl = getIOElementOfPin(dataPin);
+        auto dataPinN = dataPin - dataEl->getStart();
+        auto clockEl = getIOElementOfPin(clockPin);
+        auto clockPinN = clockPin - clockEl->getStart();
+        for (uint8_t i = 0; i < 8; i++) {
+            clockEl->digitalWrite(clockPinN, HIGH);
+            if (bitOrder == LSBFIRST)
+                val |= dataEl->digitalRead(dataPin) << i;
+            else
+                val |= dataEl->digitalRead(dataPin) << (7 - i);
+            clockEl->digitalWrite(clockPinN, LOW);
+        }
+    }
+    // Mixed version (slow)
+    else {
+        for (uint8_t i = 0; i < 8; i++) {
+            digitalWrite(clockPin, HIGH);
+            if (bitOrder == LSBFIRST)
+                val |= digitalRead(dataPin) << i;
+            else
+                val |= digitalRead(dataPin) << (7 - i);
+            digitalWrite(clockPin, LOW);
+        }
+    }
+
+    return val;
+}
+
+uint8_t shiftIn(int dataPin, int clockPin, BitOrder_t bitOrder) {
+    return ::shiftIn(arduino_pin_cast(dataPin), arduino_pin_cast(clockPin), bitOrder);
 }
 
 #if UINT16_MAX != UINT_MAX
@@ -231,6 +275,10 @@ void shiftOut(unsigned int dataPin, unsigned int clockPin, BitOrder_t bitOrder,
               uint8_t val) {
     ::shiftOut(arduino_pin_cast(dataPin), arduino_pin_cast(clockPin), bitOrder,
                val);
+}
+
+uint8_t shiftIn(unsigned int dataPin, unsigned int clockPin, BitOrder_t bitOrder) {
+    return ::shiftIn(arduino_pin_cast(dataPin), arduino_pin_cast(clockPin), bitOrder);
 }
 #endif
 

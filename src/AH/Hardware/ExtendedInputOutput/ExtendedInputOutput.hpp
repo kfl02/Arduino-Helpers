@@ -76,6 +76,11 @@ void shiftOut(pin_t dataPin, pin_t clockPin, BitOrder_t bitOrder, uint8_t val);
 /// Overload to Arduino shiftOut function
 void shiftOut(int dataPin, int clockPin, BitOrder_t bitOrder, uint8_t val);
 
+/// An ExtIO version of the Arduino function
+uint8_t shiftIn(pin_t dataPin, pin_t clockPin, BitOrder_t bitOrder);
+/// Overload to Arduino shiftIn function
+uint8_t shiftIn(int dataPin, int clockPin, BitOrder_t bitOrder);
+
 /// A buffered ExtIO version of the Arduino function
 /// @see   ExtendedIOElement::pinModeBuffered
 void pinModeBuffered(pin_t pin, PinMode_t mode);
@@ -116,6 +121,8 @@ void analogWrite(unsigned int pin, int val);
 /// Overload to Arduino shiftOut function
 void shiftOut(unsigned int dataPin, unsigned int clockPin, BitOrder_t bitOrder,
               uint8_t val);
+/// Overload to Arduino shiftIn function
+uint8_t shiftIn(unsigned int dataPin, unsigned int clockPin, BitOrder_t bitOrder);
 #endif
 
 /// @}
