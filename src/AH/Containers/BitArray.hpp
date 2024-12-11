@@ -31,6 +31,17 @@ class BitArray {
     }
 
     /**
+     * @brief   Get the value of the given bit.
+     *          For compatability with std::bitset.
+     * 
+     * @param   bitIndex
+     *          The (zero-based) index of the bit to read.
+     */
+    bool test(uint16_t bitIndex) const {
+        return buffer[getBufferIndex(bitIndex)] & getBufferMask(bitIndex);
+    }
+
+    /**
      * @brief   Set the value of the given bit to 1.
      * 
      * @param   bitIndex
@@ -47,6 +58,17 @@ class BitArray {
      *          The (zero-based) index of the bit to clear.
      */
     void clear(uint16_t bitIndex) {
+        buffer[getBufferIndex(bitIndex)] &= ~getBufferMask(bitIndex);
+    }
+
+    /**
+     * @brief   Clear the value of the given bit to 0.
+     *          For compatability with std::bitset.
+     * 
+     * @param   bitIndex
+     *          The (zero-based) index of the bit to clear.
+     */
+    void reset(uint16_t bitIndex) {
         buffer[getBufferIndex(bitIndex)] &= ~getBufferMask(bitIndex);
     }
 
