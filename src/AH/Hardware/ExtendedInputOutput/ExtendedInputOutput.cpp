@@ -211,7 +211,7 @@ uint8_t shiftIn(pin_t dataPin, pin_t clockPin, BitOrder_t bitOrder) {
     uint8_t val = 0;
 
     if (dataPin == NO_PIN || clockPin == NO_PIN)
-        return;
+        return val;
     // Native version
     if (isNativePin(dataPin) && isNativePin(clockPin)) {
         val = ::shiftIn((int)dataPin, (int)clockPin, bitOrder);
@@ -225,9 +225,9 @@ uint8_t shiftIn(pin_t dataPin, pin_t clockPin, BitOrder_t bitOrder) {
         for (uint8_t i = 0; i < 8; i++) {
             clockEl->digitalWrite(clockPinN, HIGH);
             if (bitOrder == LSBFIRST)
-                val |= dataEl->digitalRead(dataPin) << i;
+                val |= dataEl->digitalRead(dataPinN) << i;
             else
-                val |= dataEl->digitalRead(dataPin) << (7 - i);
+                val |= dataEl->digitalRead(dataPinN) << (7 - i);
             clockEl->digitalWrite(clockPinN, LOW);
         }
     }

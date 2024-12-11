@@ -116,7 +116,7 @@ class ShiftRegisterOutBase : public StaticSizeExtendedIOElement<N> {
     }
 
     /**
-     * @brief   The analogWrite function is not deprecated because a shift
+     * @brief   The analogWrite function is deprecated because a shift
      *          is always digital.
      * @param   pin
      *          The shift register pin to set.
@@ -139,7 +139,7 @@ class ShiftRegisterOutBase : public StaticSizeExtendedIOElement<N> {
     }
 
     /**
-     * @brief   Shift registers don't have an input buffer.
+     * @brief   SIPO shift registers don't have an input buffer.
      */
     void updateBufferedInputs() override {} // LCOV_EXCL_LINE
 

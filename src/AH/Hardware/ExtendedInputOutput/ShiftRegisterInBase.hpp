@@ -102,7 +102,7 @@ class ShiftRegisterInBase : public StaticSizeExtendedIOElement<N> {
      *          The state of the pin is `HIGH`.
      */
     analog_t analogRead(pin_t pin) override __attribute__((deprecated)) {
-        return 1023 * digitalRead(pin);
+        return ((1 << ADC_BITS) - 1) * digitalRead(pin);
     }
 
     /**
@@ -110,7 +110,7 @@ class ShiftRegisterInBase : public StaticSizeExtendedIOElement<N> {
      */
     analog_t analogReadBuffered(pin_t pin) override
         __attribute__((deprecated)) {
-        return 1023 * digitalRead(pin);
+        return ((1 << ADC_BITS) - 1) * digitalRead(pin);
     }
 
     /**

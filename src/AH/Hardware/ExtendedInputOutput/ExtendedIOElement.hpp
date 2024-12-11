@@ -379,7 +379,8 @@ inline uint8_t shiftIn(CachedExtIOPin dataPin, CachedExtIOPin clockPin,
     uint8_t val = 0;
 
     if (dataPin.elementPin == NO_PIN || clockPin.elementPin == NO_PIN)
-        return;
+        return val;
+
     // Native version
     if (dataPin.element == nullptr && clockPin.element == nullptr) {
         val = ::shiftIn(arduino_pin_cast(dataPin.elementPin),
