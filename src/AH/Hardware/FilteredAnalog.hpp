@@ -9,35 +9,9 @@
 #include <AH/STL/type_traits> // std::enable_if, std::is_constructible
 #include <AH/STL/utility> // std::forward
 #include <AH/Settings/SettingsWrapper.hpp>
+#include <AH/Hardware/ADCHelpers.hpp>
 
 BEGIN_AH_NAMESPACE
-
-/// Helpers to determine the value of a classes static constexpr member
-/// called analogResolution. If one is present, it is used as the analog
-/// bit width, otherwise the machine's default ADC_BITS is used.
-template<typename T>
-class has_analog_resolution {
-    using yes = char;
-    using no = struct { char x[2]; };
-
-    template<typename C> static yes test( decltype(&C::analogResolution));
-    template<typename C> static no test(...);
-
-public:
-    const static bool value = sizeof(test<T>(0)) == sizeof(yes);
-};
-
-template<typename T>
-typename std::enable_if<has_analog_resolution<T>::value, uint8_t>::type
-constexpr analogResolution() {
-    return T::analogResolution;
-}
-
-template<typename T>
-typename std::enable_if<!has_analog_resolution<T>::value, uint8_t>::type
-constexpr analogResolution() {
-    return ADC_BITS;
-}
 
 /**
  * @brief   Helper to determine how many of the remaining bits of the filter 
@@ -47,26 +21,53 @@ template <uint8_t FilterShiftFactor,
           class FilterType,
           class AnalogType,
           class ADCType = void>
-struct MaximumFilteredAnalogIncRes {
+struct MaximumFilteredAnalogIncResBase {
     constexpr static uint8_t value =
         min(sizeof(FilterType) * CHAR_BIT
                 - analogResolution<ADCType>() - FilterShiftFactor,
             sizeof(AnalogType) * CHAR_BIT - analogResolution<ADCType>());
 };
 
+template <uint8_t FilterShiftFactor,
+          class FilterType,
+          class AnalogType,
+          class ADCType = void>
+struct MaximumFilteredAnalogIncRes :
+    public MaximumFilteredAnalogIncResBase<FilterShiftFactor,
+                                           FilterType, 
+                                           AnalogType, 
+                                           ADCType> {}; 
+
+// template specialization for compatibility
+template <uint8_t FilterShiftFactor,
+          class FilterType,
+          class AnalogType>
+struct MaximumFilteredAnalogIncRes<FilterShiftFactor,
+                                   FilterType,
+                                   AnalogType,
+                                   void> :
+    public MaximumFilteredAnalogIncResBase<FilterShiftFactor,
+                                           FilterType,
+                                           AnalogType,
+                                           void> {};
+
 /**
  * @brief   FilteredAnalog base class with generic MappingFunction.
  * 
  * @see FilteredAnalog
  */
-template <class MappingFunction, uint8_t Precision = 10,
+template <class MappingFunction,
+          uint8_t Precision = 10,
           uint8_t FilterShiftFactor = ANALOG_FILTER_SHIFT_FACTOR,
           class FilterType = ANALOG_FILTER_TYPE,
           class AnalogType = analog_t,
           class ADCType = void,
           uint8_t IncRes = MaximumFilteredAnalogIncRes<
-              FilterShiftFactor, FilterType, AnalogType, ADCType>::value>
-class GenericFilteredAnalog {
+              FilterShiftFactor, 
+              FilterType, 
+              AnalogType, 
+              ADCType>::value>
+class GenericFilteredAnalogBase {
   public:
     /**
      * @brief   Construct a new GenericFilteredAnalog object.
@@ -266,6 +267,45 @@ class GenericFilteredAnalog {
         hysteresis;
 };
 
+template <class MappingFunction,
+          uint8_t Precision = 10,
+          uint8_t FilterShiftFactor = ANALOG_FILTER_SHIFT_FACTOR,
+          class FilterType = ANALOG_FILTER_TYPE,
+          class AnalogType = analog_t,
+          class ADCType = void,
+          uint8_t IncRes = MaximumFilteredAnalogIncRes<
+              FilterShiftFactor, FilterType, AnalogType, ADCType>::value>
+class GenericFilteredAnalog : 
+    public GenericFilteredAnalogBase<MappingFunction,
+                                     Precision,
+                                     FilterShiftFactor,
+                                     FilterType,
+                                     AnalogType,
+                                     ADCType,
+                                     IncRes> {};
+
+// template specialization for compatibility
+template <class MappingFunction,
+          uint8_t Precision,
+          uint8_t FilterShiftFactor,
+          class FilterType,
+          class AnalogType,
+          uint8_t IncRes>
+class GenericFilteredAnalog<MappingFunction,
+                            Precision, 
+                            FilterShiftFactor, 
+                            FilterType, 
+                            AnalogType, 
+                            void, 
+                            IncRes> :
+    public GenericFilteredAnalogBase<MappingFunction,
+                                     Precision, 
+                                     FilterShiftFactor, 
+                                     FilterType, 
+                                     AnalogType, 
+                                     void, 
+                                     IncRes> {};
+
 /**
  * @brief   A class that reads and filters an analog input.
  *
@@ -311,10 +351,14 @@ template <uint8_t Precision = 10,
           class AnalogType = analog_t,
           uint8_t IncRes = MaximumFilteredAnalogIncRes<
               FilterShiftFactor, FilterType, AnalogType>::value>
-class FilteredAnalog
-    : public GenericFilteredAnalog<AnalogType (*)(AnalogType), Precision,
-                                   FilterShiftFactor, FilterType, AnalogType,
-                                   ADCType, IncRes> {
+class FilteredAnalogBase :
+    public GenericFilteredAnalog<AnalogType (*)(AnalogType),
+                                 Precision,
+                                 FilterShiftFactor,
+                                 FilterType,
+                                 AnalogType,
+                                 ADCType,
+                                 IncRes> {
   public:
     /**
      * @brief   Construct a new FilteredAnalog object.
@@ -325,9 +369,15 @@ class FilteredAnalog
      *          The initial value of the filter.
      */
     FilteredAnalog(pin_t analogPin, AnalogType initial = 0)
-        : GenericFilteredAnalog<AnalogType (*)(AnalogType), Precision,
-                                FilterShiftFactor, FilterType, AnalogType,
-                                ADCType, IncRes>(analogPin, nullptr, initial) {}
+        : GenericFilteredAnalog<AnalogType (*)(AnalogType),
+                                Precision,
+                                FilterShiftFactor,
+                                FilterType,
+                                AnalogType,
+                                ADCType,
+                                IncRes>(analogPin,
+                                        nullptr,
+                                        initial) {}
 
     /**
      * @brief   Construct a new FilteredAnalog object.
@@ -352,8 +402,45 @@ class FilteredAnalog
      */
     void invert() {
         constexpr AnalogType maxval = FilteredAnalog::getMaxRawValue();
+
         this->map([](AnalogType val) -> AnalogType { return maxval - val; });
     }
 };
+
+template <uint8_t Precision = 10,
+          uint8_t FilterShiftFactor = ANALOG_FILTER_SHIFT_FACTOR,
+          class FilterType = ANALOG_FILTER_TYPE,
+          class ADCType = void,
+          class AnalogType = analog_t,
+          uint8_t IncRes = MaximumFilteredAnalogIncRes<
+              FilterShiftFactor,
+              FilterType,
+              AnalogType>::value>
+class FilteredAnalog :
+    public FilteredAnalogBase<Precision,
+                              FilterShiftFactor,
+                              FilterType,
+                              ADCType,
+                              AnalogType,
+                              IncRes> {};
+
+// template specialization for compatibility
+template <uint8_t Precision,
+          uint8_t FilterShiftFactor,
+          class FilterType,
+          class AnalogType,
+          uint8_t IncRes>
+class FilteredAnalog<Precision,
+                     FilterShiftFactor,
+                     FilterType,
+                     void,
+                     AnalogType,
+                     IncRes> :
+    public FilteredAnalogBase<Precision,
+                              FilterShiftFactor,
+                              FilterType,
+                              void,
+                              AnalogType,
+                              IncRes> {};
 
 END_AH_NAMESPACE
