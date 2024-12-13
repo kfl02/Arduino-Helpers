@@ -58,7 +58,7 @@ class MCP3xxx :
           selectPin(selectPin) {}
 
   public:
-    using analog_native_t = ADMultiplex<N, R, SPIDriver>::analog_native_t;
+    using native_analog_t = ADMultiplex<N, R, SPIDriver>::native_analog_t;
 
     /**
      * @brief   Read the analog value of the given input.
@@ -66,7 +66,7 @@ class MCP3xxx :
      * @param   pin
      *          The ADC's pin number to read from.
      */
-    analog_native_t analogReadNative(pin_t pin) final {
+    native_analog_t analogReadNative(pin_t pin) final {
         return readADC(pin, true);
     }
 
@@ -92,7 +92,7 @@ class MCP3xxx :
      * @param   pin
      *          See above.
      */
-    analog_native_t differentialRead(pin_t pin) {
+    native_analog_t differentialRead(pin_t pin) {
         return readADC(pin, false);
     }
 
@@ -115,15 +115,14 @@ class MCP3xxx :
      * @param   single
      *          Read in single (true) or differential mode.
      */
-    analog_native_t readADC(pin_t pin, bool single) {
+    native_analog_t readADC(pin_t pin, bool single) {
         this->driver.beginTransaction(settings);
         ExtIO::digitalWrite(selectPin, LOW);
 
         uint8_t request[S];
         uint8_t result[S];
 
-        buildRequest(pin - MCP3xxx<N, R, S, SPIDriver>::getStart(),
-                     single, request);
+        buildRequest(pin, single, request);
 
         for(size_t i = 0; i < S; i++) {
             result[i] = this->driver.transfer(request[i]);
@@ -156,7 +155,7 @@ class MCP3xxx :
      * @param   data
      *          An array containing the SPI response.
      */
-    virtual analog_native_t fixResult(uint8_t data[S]) = 0;
+    virtual native_analog_t fixResult(uint8_t data[S]) = 0;
 };
 
 /**
@@ -175,14 +174,14 @@ class MCP3001 : public MCP3xxx<N, R, S, SPIDriver> {
         : MCP3xxx<N, R, S, SPIDriver>(spi, selectPin) {}
 
   protected:
-    using analog_native_t = MCP3xxx<N, R, S, SPIDriver>::analog_native_t;
+    using native_analog_t = MCP3xxx<N, R, S, SPIDriver>::native_analog_t;
 
     void buildRequest(uint8_t pin, bool single, uint8_t data[S]) final {
         data[0] = 0;
         data[1] = 0;
     }
 
-    analog_native_t fixResult(uint8_t data[S]) final {
+    native_analog_t fixResult(uint8_t data[S]) final {
         return (((data[0] & 0x1f) << 8) | data[1]) >> 3;
     }
 };
@@ -203,7 +202,7 @@ class MCP3002 : public MCP3xxx<N, R, S, SPIDriver> {
         : MCP3xxx<N, R, S, SPIDriver>(spi, selectPin) {}
 
   protected:
-    using analog_native_t = MCP3xxx<N, R, S, SPIDriver>::analog_native_t;
+    using native_analog_t = MCP3xxx<N, R, S, SPIDriver>::native_analog_t;
 
     void buildRequest(uint8_t pin, bool single, uint8_t data[S]) final {
         data[0] = 
@@ -234,7 +233,7 @@ class MCP3002 : public MCP3xxx<N, R, S, SPIDriver> {
         data[1] = 0;
     }
 
-    analog_native_t fixResult(uint8_t data[S]) final {
+    native_analog_t fixResult(uint8_t data[S]) final {
         return ((data[0] & 0x03) << 8) | data[1];
     }
 };
@@ -255,7 +254,7 @@ class MCP3004 : public MCP3xxx<N, R, S, SPIDriver> {
         : MCP3xxx<N, R, S, SPIDriver>(spi, selectPin) {}
 
   protected:
-    using analog_native_t = MCP3xxx<N, R, S, SPIDriver>::analog_native_t;
+    using native_analog_t = MCP3xxx<N, R, S, SPIDriver>::native_analog_t;
 
     void buildRequest(uint8_t pin, bool single, uint8_t data[S]) final {
         data[0] = 0x01;         // Start bit
@@ -268,7 +267,7 @@ class MCP3004 : public MCP3xxx<N, R, S, SPIDriver> {
         data[2] = 0;
     }
 
-    analog_native_t fixResult(uint8_t data[S]) final {
+    native_analog_t fixResult(uint8_t data[S]) final {
         return ((data[1] & 0x03) << 8) | data[2];
     }
 };
@@ -289,7 +288,7 @@ class MCP3008 : public MCP3xxx<N, R, S, SPIDriver> {
         : MCP3xxx<N, R, S, SPIDriver>(spi, selectPin) {}
 
   protected:
-    using analog_native_t = MCP3xxx<N, R, S, SPIDriver>::analog_native_t;
+    using native_analog_t = MCP3xxx<N, R, S, SPIDriver>::native_analog_t;
 
     void buildRequest(uint8_t pin, bool single, uint8_t data[S]) final {
         data[0] = 0x01;         // Start bit
@@ -302,7 +301,7 @@ class MCP3008 : public MCP3xxx<N, R, S, SPIDriver> {
         data[2] = 0;
     }
 
-    analog_native_t fixResult(uint8_t data[S]) final {
+    native_analog_t fixResult(uint8_t data[S]) final {
         return ((data[1] & 0x03) << 8) | data[2];
     }
 };
@@ -323,14 +322,14 @@ class MCP3201 : public MCP3xxx<N, R, S, SPIDriver> {
         : MCP3xxx<N, R, S, SPIDriver>(spi, selectPin) {}
 
   protected:
-    using analog_native_t = MCP3xxx<N, R, S, SPIDriver>::analog_native_t;
+    using native_analog_t = MCP3xxx<N, R, S, SPIDriver>::native_analog_t;
 
     void buildRequest(uint8_t pin, bool single, uint8_t data[S]) final {
         data[0] = 0;
         data[1] = 0;
     }
 
-    analog_native_t fixResult(uint8_t data[S]) final {
+    native_analog_t fixResult(uint8_t data[S]) final {
         return (((data[0] & 0x1F) << 8) | data[1]) >> 1;
     }
 };
@@ -351,7 +350,7 @@ class MCP3202 : public MCP3xxx<N, R, S, SPIDriver> {
         : MCP3xxx<N, R, S, SPIDriver>(spi, selectPin) {}
 
   protected:
-    using analog_native_t = MCP3xxx<N, R, S, SPIDriver>::analog_native_t;
+    using native_analog_t = MCP3xxx<N, R, S, SPIDriver>::native_analog_t;
 
     void buildRequest(uint8_t pin, bool single, uint8_t data[S]) final {
         data[0] = 0x01;         // Start bit
@@ -365,7 +364,7 @@ class MCP3202 : public MCP3xxx<N, R, S, SPIDriver> {
         data[2] = 0;            // don't care
     }
 
-    analog_native_t fixResult(uint8_t data[S]) final {
+    native_analog_t fixResult(uint8_t data[S]) final {
         return ((data[1] & 0x0F) << 8) | data[2];
     }
 };
@@ -386,7 +385,7 @@ class MCP3204 : public MCP3xxx<N, R, S, SPIDriver> {
         : MCP3xxx<N, R, S, SPIDriver>(spi, selectPin) {}
 
   protected:
-    using analog_native_t = MCP3xxx<N, R, S, SPIDriver>::analog_native_t;
+    using native_analog_t = MCP3xxx<N, R, S, SPIDriver>::native_analog_t;
 
     void buildRequest(uint8_t pin, bool single, uint8_t data[S]) final {
         data[0] = 0x04;         // Start bit
@@ -399,7 +398,7 @@ class MCP3204 : public MCP3xxx<N, R, S, SPIDriver> {
         data[2] = 0;            // don't care
     }
 
-    analog_native_t fixResult(uint8_t data[S]) final {
+    native_analog_t fixResult(uint8_t data[S]) final {
         return ((data[1] & 0x0F) << 8) | data[2];
     }
 };
@@ -420,7 +419,7 @@ class MCP3208 : public MCP3xxx<N, R, S, SPIDriver> {
         : MCP3xxx<N, R, S, SPIDriver>(spi, selectPin) {}
 
   protected:
-    using analog_native_t = MCP3xxx<N, R, S, SPIDriver>::analog_native_t;
+    using native_analog_t = MCP3xxx<N, R, S, SPIDriver>::native_analog_t;
 
     void buildRequest(uint8_t pin, bool single, uint8_t data[S]) final {
         data[0] = 0x04;         // Start bit
@@ -437,7 +436,7 @@ class MCP3208 : public MCP3xxx<N, R, S, SPIDriver> {
         data[2] = 0;            // don't care
     }
 
-    analog_native_t fixResult(uint8_t data[S]) final {
+    native_analog_t fixResult(uint8_t data[S]) final {
         return ((data[1] & 0x0F) << 8) | data[2];
     }
 };
@@ -459,14 +458,14 @@ class MCP3301 : public MCP3xxx<N, R, S, SPIDriver> {
         : MCP3xxx<N, R, S, SPIDriver>(spi, selectPin) {}
 
   protected:
-    using analog_native_t = MCP3xxx<N, R, S, SPIDriver>::analog_native_t;
+    using native_analog_t = MCP3xxx<N, R, S, SPIDriver>::native_analog_t;
 
     void buildRequest(uint8_t pin, bool single, uint8_t data[S]) final {
         data[0] = 0;
         data[1] = 0;
     }
 
-    analog_native_t fixResult(uint8_t data[S]) final {
+    native_analog_t fixResult(uint8_t data[S]) final {
         return (data[0] & 0x10 ? 0xf000 : 0x0000)  | (data[0] << 8) | data[1];
     }
 };
@@ -488,7 +487,7 @@ class MCP3302 : public MCP3xxx<N, R, S, SPIDriver> {
         : MCP3xxx<N, R, S, SPIDriver>(spi, selectPin) {}
 
   protected:
-    using analog_native_t = MCP3xxx<N, R, S, SPIDriver>::analog_native_t;
+    using native_analog_t = MCP3xxx<N, R, S, SPIDriver>::native_analog_t;
 
     void buildRequest(uint8_t pin, bool single, uint8_t data[S]) final {
         data[0] = 0x08;         // Start bit
@@ -502,7 +501,7 @@ class MCP3302 : public MCP3xxx<N, R, S, SPIDriver> {
         data[2] = 0;            // don't care
     }
 
-    analog_native_t fixResult(uint8_t data[S]) final {
+    native_analog_t fixResult(uint8_t data[S]) final {
         return (data[1] & 0x10 ? 0xf000 : 0x0000)  | (data[1] << 8) | data[2];
     }
 };
@@ -524,7 +523,7 @@ class MCP3304 : public MCP3xxx<N, R, S, SPIDriver> {
         : MCP3xxx<N, R, S, SPIDriver>(spi, selectPin) {}
 
   protected:
-    using analog_native_t = MCP3xxx<N, R, S, SPIDriver>::analog_native_t;
+    using native_analog_t = MCP3xxx<N, R, S, SPIDriver>::native_analog_t;
 
     void buildRequest(uint8_t pin, bool single, uint8_t data[S]) final {
         data[0] = 0x08;         // Start bit
@@ -538,7 +537,7 @@ class MCP3304 : public MCP3xxx<N, R, S, SPIDriver> {
         data[2] = 0;            // don't care
     }
 
-    analog_native_t fixResult(uint8_t data[S]) final {
+    native_analog_t fixResult(uint8_t data[S]) final {
         return (data[1] & 0x10 ? 0xf000 : 0x0000)  | (data[1] << 8) | data[2];
     }
 };
