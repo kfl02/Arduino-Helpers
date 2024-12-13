@@ -92,7 +92,7 @@ void analogWrite(pin_t pin, analog_t val) {
     if (pin == NO_PIN)
         return; // LCOV_EXCL_LINE
     else if (isNativePin(pin)) {
-#ifndef ESP32
+#if !defined(ESP32) || ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
         ::analogWrite(pin, val);
 #endif
     } else {
@@ -101,7 +101,7 @@ void analogWrite(pin_t pin, analog_t val) {
     }
 }
 void analogWrite(pin_t pin, int val) { analogWrite(pin, (analog_t)val); }
-#ifndef ESP32
+#if !defined(ESP32) || ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
 void analogWrite(int pin, analog_t val) {
     ::analogWrite(arduino_pin_cast(pin), val);
 }
@@ -159,7 +159,7 @@ void analogWriteBuffered(pin_t pin, analog_t val) {
     if (pin == NO_PIN)
         return; // LCOV_EXCL_LINE
     else if (isNativePin(pin)) {
-#ifndef ESP32
+#if !defined(ESP32) || ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
         ::analogWrite(pin, val);
 #endif
     } else {
@@ -263,7 +263,7 @@ PinStatus_t digitalRead(unsigned int pin) {
 analog_t analogRead(unsigned int pin) {
     return ::analogRead(arduino_pin_cast(pin));
 }
-#ifndef ESP32
+#if !defined(ESP32) || ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
 void analogWrite(unsigned int pin, analog_t val) {
     ::analogWrite(arduino_pin_cast(pin), val);
 }

@@ -64,7 +64,7 @@ void analogWrite(pin_t pin, analog_t val);
 /// An ExtIO version of the Arduino function
 /// @see    ExtendedIOElement::analogWrite
 void analogWrite(pin_t pin, int val);
-#ifndef ESP32
+#if !defined(ESP32) || ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
 /// Overload to Arduino analogWrite function.
 void analogWrite(int pin, analog_t val);
 /// Overload to Arduino analogWrite function.
@@ -111,7 +111,7 @@ PinStatus_t digitalRead(unsigned int pin);
 
 /// Overload to Arduino analogRead function.
 analog_t analogRead(unsigned int pin);
-#ifndef ESP32
+#if !defined(ESP32) || ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
 /// Overload to Arduino analogWrite function.
 void analogWrite(unsigned int pin, analog_t val);
 /// Overload to Arduino analogWrite function.

@@ -323,7 +323,7 @@ inline analog_t analogRead(CachedExtIOPin pin) {
 /// An ExtIO version of the Arduino function
 /// @see    ExtendedIOElement::analogWrite
 inline void analogWrite(CachedExtIOPin pin, analog_t val) {
-#ifndef ESP32
+#if !defined(ESP32) || ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
     pin.apply(
         &ExtendedIOElement::analogWrite, //
         [](ArduinoPin_t p, analog_t v) { ::analogWrite(p, v); }, val);
@@ -446,7 +446,7 @@ inline analog_t analogReadBuffered(CachedExtIOPin pin) {
 /// A buffered ExtIO version of the Arduino function
 /// @see    ExtendedIOElement::analogWriteBuffered
 inline void analogWriteBuffered(CachedExtIOPin pin, analog_t val) {
-#ifndef ESP32
+#if !defined(ESP32) || ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
     pin.apply(
         &ExtendedIOElement::analogWriteBuffered, //
         [](ArduinoPin_t p, analog_t v) { ::analogWrite(p, v); }, val);
