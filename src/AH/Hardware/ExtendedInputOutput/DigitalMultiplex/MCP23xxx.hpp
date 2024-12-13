@@ -432,15 +432,15 @@ class MCP23S08 :
         MCP23Sxx<Driver, N>::begin();
 
         uint8_t val = 
-            0b01100100;
+            0b00000000;
         //    │││││││└─ unimplemented
         //    ││││││└── INTPOL = Active-low
-        //    │││││└─── ODR    = Open-drain output
-        //    │││││              (overrides the INTPOL bit)
+        //    │││││└─── ODR    = Active driver output
+        //    │││││              (INTPOL bit sets the polarity)
         //    ││││└──── HAEN   = Disables the MCP23S08 address pins
         //    │││└───── DISSLW = Slew rate enabled
-        //    ││└────── SEQOP  = Sequential operation disabled,
-        //    ││                 address pointer does not increment
+        //    ││└────── SEQOP  = Sequential operation enabled,
+        //    ││                 address pointer increments
         //    │└─────── unimplemented
         //    └──────── unimplemented
 
@@ -458,7 +458,6 @@ class MCP23S08 :
         this->writeReg(MCP23xxx<Driver, N>::IOCON, val);
 
         // HAEN is on if address != 0
-
         this->address = tmpAddr;
     }
 };
@@ -484,15 +483,15 @@ class MCP23008 :
         this->init();
 
         uint8_t val = 
-            0b01100100;
+            0b00000000;
         //    │││││││└─ unimplemented
         //    ││││││└── INTPOL = Active-low
-        //    │││││└─── ODR    = Open-drain output
-        //    │││││              (overrides the INTPOL bit)
+        //    │││││└─── ODR    = Active driver output
+        //    │││││              (INTPOL bit sets the polarity)
         //    ││││└──── HAEN   = Disables the MCP23S08 address pins
         //    │││└───── DISSLW = Slew rate enabled
-        //    ││└────── SEQOP  = Sequential operation disabled,
-        //    ││                 address pointer does not increment
+        //    ││└────── SEQOP  = Sequential operation enabled,
+        //    ││                 address pointer increments
         //    │└─────── unimplemented
         //    └──────── unimplemented
 
@@ -525,15 +524,15 @@ class MCP23S17 :
         // First make sure to set BANK = 1 on MSCP23017 in register 0x0B,
         // which is not a valid register when BANK is already 1
         uint8_t val = 
-            0b11100100;
+            0b11000000;
         //    │││││││└─ unimplemented
         //    ││││││└── INTPOL = Active-low
-        //    │││││└─── ODR    = Open-drain output
-        //    │││││              (overrides the INTPOL bit)
+        //    │││││└─── ODR    = Active driver output
+        //    │││││              (INTPOL bit sets the polarity)
         //    ││││└──── HAEN   = Disables the MCP23S17 address pins
         //    │││└───── DISSLW = Slew rate enabled
-        //    ││└────── SEQOP  = Sequential operation disabled,
-        //    ││                 address pointer does not increment
+        //    ││└────── SEQOP  = Sequential operation enabled,
+        //    ││                 address pointer increments
         //    │└─────── MIRROR = The INT pins are internally connected
         //    └──────── BANK   = The registers are in different banks
         //                       (addresses are segregated)
@@ -558,7 +557,6 @@ class MCP23S17 :
         this->writeReg(MCP23xxx<Driver, N>::IOCON, val);
 
         // Bank is now 0, HAEN is on if address != 0
-
         this->address = tmpAddr;
     }
 };
@@ -586,15 +584,15 @@ class MCP23017 :
         // First make sure to set BANK = 1 on MSCP23017 in register 0x0B,
         // which is not a valid register when BANK is already 1
         uint8_t val = 
-            0b11100100;
+            0b11000000;
         //    │││││││└─ unimplemented
         //    ││││││└── INTPOL = Active-low
-        //    │││││└─── ODR    = Open-drain output
-        //    │││││              (overrides the INTPOL bit)
+        //    │││││└─── ODR    = Active driver output
+        //    │││││              (INTPOL bit sets the polarity)
         //    ││││└──── HAEN   = Disables the MCP23S17 address pins
         //    │││└───── DISSLW = Slew rate enabled
-        //    ││└────── SEQOP  = Sequential operation disabled,
-        //    ││                 address pointer does not increment
+        //    ││└────── SEQOP  = Sequential operation enabled,
+        //    ││                 address pointer increments
         //    │└─────── MIRROR = The INT pins are internally connected
         //    └──────── BANK   = The registers are in different banks
         //                       (addresses are segregated)
